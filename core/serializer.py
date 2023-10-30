@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model, authenticate
+from .models import User
+
 
 UserModel = get_user_model()
 
@@ -16,6 +18,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 		user_obj.apellido = clean_data['apellido']
 		user_obj.carrera.set(clean_data['carrera'])
 		user_obj.curso = clean_data['curso']
+		user_obj.solicitudes = clean_data[['solicitudes']]
 		user_obj.save()
 		return user_obj
 
@@ -32,4 +35,9 @@ class UserLoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = UserModel
-		fields = ('email', 'rut', 'rol', 'nombre', 'apellido','carrera','curso')
+		fields = ('email', 'rut', 'rol', 'nombre', 'apellido','carrera','curso', 'solicitudes')
+  
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'

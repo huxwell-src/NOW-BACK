@@ -1,11 +1,13 @@
 from django.urls import path
 from rest_framework.documentation import include_docs_urls
 from . import views
+from .views import UserList
 
 urlpatterns = [
 	path('register', views.UserRegister.as_view(), name='register'),
 	path('login', views.UserLogin.as_view(), name='login'),
 	path('logout', views.UserLogout.as_view(), name='logout'),
 	path('user', views.UserView.as_view(), name='user'),
+ 	path('users', UserList.as_view(), name='user-list'),
 	path('docs/', include_docs_urls(title="NOW Api"))
 ]
