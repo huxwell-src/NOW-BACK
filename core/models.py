@@ -35,14 +35,14 @@ class AppUserManager(BaseUserManager):
 # Definición del modelo User
 class User(AbstractBaseUser, PermissionsMixin):
     id_user = models.AutoField(primary_key=True)
-    rut = models.CharField(max_length=12, unique=True)
-    nombre = models.CharField(max_length=100)
+    rut = models.CharField(max_length=12, blank=False)
+    nombre = models.CharField(max_length=100, blank=False)
     apellido = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=False)
     password = models.CharField(max_length=100)
     last_login = models.DateTimeField(blank=True, null=True, verbose_name='Last Login')
     is_superuser = models.BooleanField(default=False, verbose_name='Is Superuser')
-    rol = models.CharField(max_length=15)
+    rol = models.CharField(max_length=15, blank=False, default="Alumno")
     carrera = models.ManyToManyField(Carrera, blank=True)
     curso = models.CharField(max_length=100, blank=True, null=True)
     solicitudes = models.ManyToManyField('Solicitud', related_name='usuarios_solicitudes', blank=True)
