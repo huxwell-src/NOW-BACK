@@ -25,14 +25,7 @@ SECRET_KEY = "django-insecure-_7!sqoa2!ln%q2ztq3fko-k^-6us$a-e8hi!r_djr_dexeu(8z
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "https://now-front.vercel.app"
-]
 
 # Application definition
 
@@ -61,6 +54,16 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+ALLOWED_HOSTS = []
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "https://now-front.vercel.app"
+]
+
 ROOT_URLCONF = "now.urls"
 
 TEMPLATES = [
@@ -84,13 +87,17 @@ WSGI_APPLICATION = "now.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+  'default': {
+    'ENGINE': 'django.db.backends.mysql',
+    'NAME': 'now',
+    'HOST': 'localhost',  # El nombre del host de tu base de datos local
+    'PORT': '3306',       # El puerto de MySQL (por defecto es 3306)
+    'USER': 'root',  # Tu nombre de usuario de MySQL
+    'PASSWORD': '',  # Tu contraseña de MySQL
+  }
 }
+  
 
 
 # Password validation
@@ -136,6 +143,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ## User model
 AUTH_USER_MODEL = 'core.User'
+
+
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',

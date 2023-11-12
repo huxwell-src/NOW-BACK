@@ -43,8 +43,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_login = models.DateTimeField(blank=True, null=True, verbose_name='Last Login')
     is_superuser = models.BooleanField(default=False, verbose_name='Is Superuser')
     rol = models.CharField(max_length=15, blank=False, default="Alumno")
-    carrera = models.ManyToManyField(Carrera, blank=True)
-    curso = models.CharField(max_length=100, blank=True, null=True)
+    carrera = models.ManyToManyField(Carrera,  blank=True)
+    curso = models.CharField(max_length=100,  blank=True, default="Sin curso")
     solicitudes = models.ManyToManyField('Solicitud', related_name='usuarios_solicitudes', blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['rut']
@@ -75,8 +75,8 @@ class Solicitud(models.Model):
     fecha_entrega = models.DateField(null=True, blank=True)
     fecha_devolucion = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=20, default="en revisión")
-    aprobacion = models.BooleanField(default=True)
-    profesor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='solicitudes_profesor')
+    aprobacion = models.BooleanField(default=False)
+    profesor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, related_name='solicitudes_profesor')
 
     def __str__(self):
         return f"Solicitud de {self.usuario.nombre}"

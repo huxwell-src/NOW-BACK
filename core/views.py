@@ -5,23 +5,33 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login, logout
-from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, UserListSerializer
-from .validations import custom_validation, validate_email, validate_password
+from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, ProductoSerializer, SolicitudSerializer
+from .validations import validate_email, validate_password
 from rest_framework import generics
-from .models import User
+from .models import User, Producto, Solicitud, ProductoSolicitado
 
-class UserRegister(APIView):
+# CREAR - VER USUARIOS [GET, POST]
+class UserListCreateView(generics.ListCreateAPIView):
     permission_classes = []  # Solo usuarios autenticados pueden acceder
     authentication_classes = [TokenAuthentication]  # Usar TokenAuthentication
-    def post(self, request):
-        clean_data = custom_validation(request.data)
-        serializer = UserRegisterSerializer(data=clean_data)
-        if serializer.is_valid(raise_exception=True):
-            user = serializer.create(clean_data)
-            if user:
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+    queryset = User.objects.all()
+    serializer_class = UserRegisterSerializer
+    
+# BORRAR  USUARIOS [DELETE]
+class UserDeleteView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    queryset = User.objects.all()
+    serializer_class = UserRegisterSerializer
 
+# EDITAR USUARIOS [PUT]
+class UserUpdateView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    queryset = User.objects.all()
+    serializer_class = UserRegisterSerializer
+    
+# LOGIN USUARIOS [POST]
 class UserLogin(APIView):
     permission_classes = []  # No se requiere autenticación para iniciar sesión
     authentication_classes = [TokenAuthentication]  # Usar TokenAuthentication
@@ -40,6 +50,7 @@ class UserLogin(APIView):
                 'token': token.key  # Aquí se incluye el token en la respuesta
             }, status=status.HTTP_200_OK)
 
+# LOGOUT USUARIOS [POST]
 class UserLogout(APIView):
     permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
     authentication_classes = [TokenAuthentication]  # Usar TokenAuthentication
@@ -47,6 +58,7 @@ class UserLogout(APIView):
         logout(request)
         return Response({'detail': 'Cierre de sesión exitoso'}, status=status.HTTP_200_OK)
 
+# INFORMACION USUARIO [GET, POST]
 class UserView(APIView):
     permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
     authentication_classes = [TokenAuthentication]  # Usar TokenAuthentication
@@ -54,6 +66,8 @@ class UserView(APIView):
         serializer = UserSerializer(request.user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
 
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class ProductoListView(generics.ListAPIView):
+    queryset = Producto.objects.all()
+    serializer_class = ProductoSerializer
+    
+    
