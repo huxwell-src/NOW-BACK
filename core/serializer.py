@@ -58,4 +58,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id_user','email', 'rut', 'rol', 'nombre', 'apellido', 'carrera', 'curso', 'solicitudes')
 
+class ProductoSerializer(serializers.ModelSerializer):
+    carrera = CarreraSerializer(many=True)
+
+    class Meta:
+        model = Producto
+        fields = ('id_producto', 'nombre', 'stock', 'medida_stock', 'descripcion', 'carrera')
+        
+
         

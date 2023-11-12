@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login, logout
-from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, ProductoSerializer, SolicitudSerializer
+from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, ProductoSerializer
 from .validations import validate_email, validate_password
 from rest_framework import generics
 from .models import User, Producto, Solicitud, ProductoSolicitado
