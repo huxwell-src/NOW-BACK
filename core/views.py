@@ -5,10 +5,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login, logout
-from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, ProductoSerializer
+from .serializer import UserRegisterSerializer, UserLoginSerializer, UserSerializer, ProductoSerializer, SolicitudSerializer
 from .validations import validate_email, validate_password
 from rest_framework import generics
-from .models import User, Producto, Solicitud, ProductoSolicitado
+from .models import User, Producto, Solicitud
 
 # CREAR - VER USUARIOS [GET, POST]
 class UserListCreateView(generics.ListCreateAPIView):
@@ -60,8 +60,9 @@ class UserLogout(APIView):
 
 # INFORMACION USUARIO [GET, POST]
 class UserView(APIView):
-    permission_classes = [IsAuthenticated]  # Solo usuarios autenticados pueden acceder
-    authentication_classes = [TokenAuthentication]  # Usar TokenAuthentication
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
@@ -70,4 +71,13 @@ class ProductoListView(generics.ListAPIView):
     queryset = Producto.objects.all()
     serializer_class = ProductoSerializer
     
-    
+# =========================================== SOLICITUD ==============================================================================
+class SolicitudListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Solicitud.objects.all()
+    serializer_class = SolicitudSerializer
+
+class SolicitudRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Solicitud.objects.all()
+    serializer_class = SolicitudSerializer

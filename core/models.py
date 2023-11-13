@@ -92,6 +92,6 @@ class Solicitud(models.Model):
 
 # Definición del modelo ProductoSolicitado (tabla intermedia entre Solicitud y Producto)
 class ProductoSolicitado(models.Model):
-    solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE)
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    id_solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE)
+    id_producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.PositiveIntegerField(default=1)
