@@ -1,4 +1,4 @@
-# NOE App (BACK-END)
+# NOW App (BACK-END)
 
 Breve descripción o introducción del proyecto.
 
