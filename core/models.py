@@ -82,9 +82,7 @@ class Solicitud(models.Model):
         return f"Solicitud de {self.usuario.nombre}"
 
     def save(self, *args, **kwargs):
-        if not self.aprobacion:
-            self.estado = "rechazado"
-        elif self.fecha_entrega and self.fecha_devolucion and self.fecha_entrega > self.fecha_devolucion:
+        if  self.fecha_entrega and self.fecha_devolucion and self.fecha_entrega > self.fecha_devolucion:
             self.estado = "atrasado"
             if (self.fecha_entrega - self.fecha_devolucion).days > 10:
                 self.estado = "reportado"

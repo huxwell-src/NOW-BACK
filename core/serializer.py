@@ -83,7 +83,7 @@ class SolicitudSerializer(serializers.ModelSerializer):
             ProductoSolicitado.objects.create(id_solicitud=solicitud, id_producto_id=id_producto, cantidad=cantidad)
 
         return solicitud
-
+    
     def update(self, instance, validated_data):
         productos_data = validated_data.pop('productos', [])
 
