@@ -29,6 +29,22 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.solicitudes.set(validated_data['solicitudes'])
         user.save()
         return user
+    
+    def update(self, instance, validated_data):
+        # Agregar lógica para la actualización de usuario
+        instance.rol = validated_data.get('rol', instance.rol)
+        instance.rut = validated_data.get('rut', instance.rut)
+        instance.nombre = validated_data.get('nombre', instance.nombre)
+        instance.apellido = validated_data.get('apellido', instance.apellido)
+        instance.carrera.set(validated_data.get('carrera', instance.carrera.all()))
+        instance.curso = validated_data.get('curso', instance.curso)
+        instance.solicitudes.set(validated_data.get('solicitudes', instance.solicitudes.all()))
+        password = validated_data.get('password')
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -55,6 +71,7 @@ class CarreraSerializer(serializers.ModelSerializer):
 # =========================================== SOLICITUD ==============================================================================
  
 
+
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
@@ -64,7 +81,6 @@ class ProductoSolicitadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductoSolicitado
         fields = ('id_producto', 'cantidad')
-
 class SolicitudSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     productos = ProductoSolicitadoSerializer(many=True)
@@ -74,6 +90,15 @@ class SolicitudSerializer(serializers.ModelSerializer):
         fields = ('id_solicitud', 'usuario', 'productos', 'fecha_creacion', 'fecha_entrega', 'fecha_devolucion', 'estado', 'aprobacion', 'profesor')
 
     def create(self, validated_data):
+        """
+        Crea una nueva instancia de Solicitud junto con los ProductosSolicitados asociados.
+
+        Args:
+            validated_data (dict): Diccionario con los datos validados para la creación de la Solicitud.
+
+        Returns:
+            Solicitud: Instancia de la Solicitud creada.
+        """
         productos_data = validated_data.pop('productos', [])
         solicitud = Solicitud.objects.create(**validated_data)
 
@@ -85,27 +110,38 @@ class SolicitudSerializer(serializers.ModelSerializer):
         return solicitud
     
     def update(self, instance, validated_data):
+        """
+        Actualiza una instancia existente de Solicitud junto con los ProductosSolicitados asociados.
+
+        Args:
+            instance (Solicitud): Instancia existente de la Solicitud que se va a actualizar.
+            validated_data (dict): Diccionario con los datos validados para la actualización de la Solicitud.
+
+        Returns:
+            Solicitud: Instancia de la Solicitud actualizada.
+        """
         productos_data = validated_data.pop('productos', [])
+        instance = super().update(instance, validated_data)
 
-        instance.usuario = validated_data.get('usuario', instance.usuario)
-        instance.fecha_creacion = validated_data.get('fecha_creacion', instance.fecha_creacion)
-        instance.fecha_entrega = validated_data.get('fecha_entrega', instance.fecha_entrega)
-        instance.fecha_devolucion = validated_data.get('fecha_devolucion', instance.fecha_devolucion)
-        instance.estado = validated_data.get('estado', instance.estado)
-        instance.aprobacion = validated_data.get('aprobacion', instance.aprobacion)
-        instance.profesor = validated_data.get('profesor', instance.profesor)
-
-        instance.save()
-
-        # Actualizar productos
-        instance.productos.all().delete()
-
+        # Actualizar los productos asociados
         for producto_data in productos_data:
-            id_producto = producto_data['id_producto']
-            cantidad = producto_data['cantidad']
-            ProductoSolicitado.objects.create(id_solicitud=instance, id_producto_id=id_producto, cantidad=cantidad)
+            producto_id = producto_data['id_producto'].id_producto
+            cantidad = producto_data.get('cantidad')
+
+            # Buscar el ProductoSolicitado existente o crear uno nuevo
+            producto_solicitado, created = ProductoSolicitado.objects.get_or_create(
+                id_solicitud=instance,
+                id_producto_id=producto_id,
+                defaults={'cantidad': cantidad}
+            )
+
+            # Si no se creó un nuevo ProductoSolicitado, actualiza la cantidad
+            if not created:
+                producto_solicitado.cantidad = cantidad
+                producto_solicitado.save()
 
         return instance
+
     
 class UserSerializer(serializers.ModelSerializer):
     carrera = CarreraSerializer(many=True)

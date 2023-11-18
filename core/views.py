@@ -81,3 +81,6 @@ class SolicitudRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Solicitud.objects.all()
     serializer_class = SolicitudSerializer
+    
+
+    

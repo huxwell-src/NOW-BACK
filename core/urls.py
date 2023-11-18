@@ -14,5 +14,5 @@ urlpatterns = [
     path('solicitudes', SolicitudListCreateView.as_view(), name='solicitud-list-create'),
     path('solicitudes/<int:pk>', SolicitudRetrieveUpdateView.as_view(), name='solicitud-retrieve-update'),
     
-    path('docs/', include_docs_urls(title="NOW Api"))
+    path('docs/', include_docs_urls(title="NOW Api", public=True)),  # Hacer la documentación pública
 ]
