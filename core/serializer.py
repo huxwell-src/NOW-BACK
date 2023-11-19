@@ -83,11 +83,11 @@ class ProductoSolicitadoSerializer(serializers.ModelSerializer):
         fields = ('id_producto', 'cantidad')
 class SolicitudSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    productos = ProductoSolicitadoSerializer(many=True)
+    productos = ProductoSolicitadoSerializer(many=True, required=False)
 
     class Meta:
         model = Solicitud
-        fields = ('id_solicitud', 'usuario', 'productos', 'fecha_creacion', 'fecha_entrega', 'fecha_devolucion', 'estado', 'aprobacion', 'profesor')
+        fields = ('id_solicitud', 'usuario', 'productos', 'nota' , 'fecha_creacion', 'fecha_entrega', 'fecha_devolucion', 'estado', 'aprobacion', 'profesor')
 
     def create(self, validated_data):
         """

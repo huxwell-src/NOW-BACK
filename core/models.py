@@ -61,6 +61,8 @@ class Producto(models.Model):
     medida_stock = models.CharField(max_length=20)
     descripcion = models.TextField()
     carrera = models.ManyToManyField(Carrera, blank=True)
+    disponibilidad = models.IntegerField(default=0)
+    estado_stock = models.CharField(max_length=250, default="")
 
     def __str__(self):
         return self.nombre
@@ -75,6 +77,7 @@ class Solicitud(models.Model):
     fecha_entrega = models.DateField(null=True, blank=True)
     fecha_devolucion = models.DateField(null=True, blank=True)
     estado = models.CharField(max_length=20, default="en revisión")
+    nota = models.CharField(max_length=250, default="",  blank=True)
     aprobacion = models.BooleanField(default=False)
     profesor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, related_name='solicitudes_profesor')
 
