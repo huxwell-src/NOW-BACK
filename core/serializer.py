@@ -9,7 +9,7 @@ UserModel = get_user_model()
 
 # REGISTRAR - VER USUARIOS
 class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
