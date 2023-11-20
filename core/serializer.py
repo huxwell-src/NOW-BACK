@@ -31,25 +31,35 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
     
     def update(self, instance, validated_data):
-        # Agregar lógica para la actualización de usuario
+        validated_data.pop('password', None)  # Eliminar el campo password de los datos validados
+
+        # Actualizar campos simples
         instance.rol = validated_data.get('rol', instance.rol)
         instance.rut = validated_data.get('rut', instance.rut)
         instance.nombre = validated_data.get('nombre', instance.nombre)
         instance.apellido = validated_data.get('apellido', instance.apellido)
-        instance.carrera.set(validated_data.get('carrera', instance.carrera.all()))
         instance.curso = validated_data.get('curso', instance.curso)
-        instance.solicitudes.set(validated_data.get('solicitudes', instance.solicitudes.all()))
+
+        # Actualizar campos de relaciones
+        if 'carrera' in validated_data:
+            instance.carrera.set(validated_data['carrera'])
+
+        if 'solicitudes' in validated_data:
+            instance.solicitudes.set(validated_data['solicitudes'])
+
+        # Actualizar contraseña si se proporciona
         password = validated_data.get('password')
         if password:
             instance.set_password(password)
-        instance.save()
-        return instance
 
+        instance.save()
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        # No es necesario incluir el campo 'password' en la respuesta, ya que está configurado como write_only
-        return data 
+        # Excluir el campo 'password' de la representación
+        data.pop('password', None)
+        return data
 
 # LOGUEAR USUARIOS
 
