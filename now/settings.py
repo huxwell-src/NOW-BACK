@@ -141,6 +141,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+DEFAULT_FROM_EMAIL = 'niko2000gb@gmail.com'
+
+
 ## User model
 AUTH_USER_MODEL = 'core.User'
 
