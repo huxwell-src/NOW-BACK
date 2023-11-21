@@ -91,24 +91,60 @@ class ProductoSolicitadoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductoSolicitado
         fields = ('id_producto', 'cantidad')
+
 class SolicitudSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    productos = ProductoSolicitadoSerializer(many=True, required=False)
+    productos = ProductoSolicitadoSerializer(many=True, required=False, source='productosolicitado_set')
 
     class Meta:
         model = Solicitud
-        fields = ('id_solicitud', 'usuario', 'productos', 'nota' , 'fecha_creacion', 'fecha_entrega', 'fecha_devolucion', 'estado', 'aprobacion', 'profesor')
+        fields = ('id_solicitud', 'usuario', 'productos', 'nota', 'fecha_creacion', 'fecha_entrega', 'fecha_devolucion', 'estado', 'aprobacion', 'profesor')
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Obtener información adicional del usuario y del profesor
+        usuario_info = {
+            'id_user': instance.usuario.id_user,
+            'nombre': instance.usuario.nombre,
+            'apellido': instance.usuario.apellido,
+            'rut': instance.usuario.rut,
+        }
+        profesor_info = None
+        if instance.profesor:
+            profesor_info = {
+                'id_user': instance.profesor.id_user,
+                'nombre': instance.profesor.nombre,
+                'apellido': instance.profesor.apellido,
+                'rut': instance.profesor.rut,
+            }
+
+        # Obtener información adicional de los productos solicitados
+        productos_info = []
+        for producto_solicitado in instance.productosolicitado_set.all():
+            producto_id = producto_solicitado.id_producto_id
+
+            # Asegurar que producto_id es un entero
+            if isinstance(producto_id, int):
+                try:
+                    producto = Producto.objects.get(id_producto=producto_id)
+                    producto_solicitado_info = {
+                        'id_producto': producto_id,
+                        'cantidad': producto_solicitado.cantidad
+                    }
+                    productos_info.append(producto_solicitado_info)
+                except Producto.DoesNotExist:
+                    # Manejar la situación en la que el producto no existe
+                    pass
+
+        representation['usuario'] = usuario_info
+        representation['profesor'] = profesor_info
+        representation['productos'] = productos_info
+        return representation
+
+
+    
     def create(self, validated_data):
-        """
-        Crea una nueva instancia de Solicitud junto con los ProductosSolicitados asociados.
-
-        Args:
-            validated_data (dict): Diccionario con los datos validados para la creación de la Solicitud.
-
-        Returns:
-            Solicitud: Instancia de la Solicitud creada.
-        """
         productos_data = validated_data.pop('productos', [])
         solicitud = Solicitud.objects.create(**validated_data)
 
@@ -120,16 +156,6 @@ class SolicitudSerializer(serializers.ModelSerializer):
         return solicitud
     
     def update(self, instance, validated_data):
-        """
-        Actualiza una instancia existente de Solicitud junto con los ProductosSolicitados asociados.
-
-        Args:
-            instance (Solicitud): Instancia existente de la Solicitud que se va a actualizar.
-            validated_data (dict): Diccionario con los datos validados para la actualización de la Solicitud.
-
-        Returns:
-            Solicitud: Instancia de la Solicitud actualizada.
-        """
         productos_data = validated_data.pop('productos', [])
         instance = super().update(instance, validated_data)
 
