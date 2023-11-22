@@ -77,11 +77,9 @@ class SolicitudListCreateView(generics.ListCreateAPIView):
     queryset = Solicitud.objects.all()
     serializer_class = SolicitudSerializer
 
-    def get_serializer_context(self):
-        # Pasar el contexto actual del request al serializador
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
+    def perform_create(self, serializer):
+        serializer.save()
+
 
 class SolicitudRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]

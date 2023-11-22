@@ -91,6 +91,8 @@ class Solicitud(models.Model):
                 self.estado = "reportado"
         super().save(*args, **kwargs)
 
+    
+
 # Definición del modelo ProductoSolicitado (tabla intermedia entre Solicitud y Producto)
 class ProductoSolicitado(models.Model):
     id_solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE)

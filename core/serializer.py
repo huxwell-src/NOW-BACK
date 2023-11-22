@@ -94,7 +94,7 @@ class ProductoSolicitadoSerializer(serializers.ModelSerializer):
 
 class SolicitudSerializer(serializers.ModelSerializer):
     usuario = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    productos = ProductoSolicitadoSerializer(many=True, required=False, source='productosolicitado_set')
+    productos = ProductoSolicitadoSerializer(many=True, required=False)
 
     class Meta:
         model = Solicitud
@@ -130,7 +130,8 @@ class SolicitudSerializer(serializers.ModelSerializer):
                     producto = Producto.objects.get(id_producto=producto_id)
                     producto_solicitado_info = {
                         'id_producto': producto_id,
-                        'cantidad': producto_solicitado.cantidad
+                        'cantidad': producto_solicitado.cantidad,
+                        'nombre': producto.nombre  # Agrega el nombre del producto
                     }
                     productos_info.append(producto_solicitado_info)
                 except Producto.DoesNotExist:
@@ -142,18 +143,18 @@ class SolicitudSerializer(serializers.ModelSerializer):
         representation['productos'] = productos_info
         return representation
 
-
     
     def create(self, validated_data):
         productos_data = validated_data.pop('productos', [])
         solicitud = Solicitud.objects.create(**validated_data)
 
         for producto_data in productos_data:
-            id_producto = producto_data['id_producto'].id_producto  # Accede al id del producto
+            id_producto = producto_data['id_producto']  # Accede directamente al id del producto
             cantidad = producto_data['cantidad']
-            ProductoSolicitado.objects.create(id_solicitud=solicitud, id_producto_id=id_producto, cantidad=cantidad)
+            ProductoSolicitado.objects.create(id_solicitud=solicitud, id_producto=id_producto, cantidad=cantidad)
 
         return solicitud
+
     
     def update(self, instance, validated_data):
         productos_data = validated_data.pop('productos', [])
