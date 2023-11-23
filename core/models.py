@@ -76,7 +76,7 @@ class Solicitud(models.Model):
     fecha_creacion = models.DateField(auto_now_add=True)
     fecha_entrega = models.DateField(null=True, blank=True)
     fecha_devolucion = models.DateField(null=True, blank=True)
-    estado = models.CharField(max_length=20, default="en revisión")
+    estado = models.CharField(max_length=20, default="En Revisión")
     nota = models.CharField(max_length=250, default="",  blank=True)
     aprobacion = models.BooleanField(default=False)
     profesor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=False, related_name='solicitudes_profesor')
@@ -85,11 +85,11 @@ class Solicitud(models.Model):
         return f"Solicitud de {self.usuario.nombre}"
 
     def save(self, *args, **kwargs):
-        if  self.fecha_entrega and self.fecha_devolucion and self.fecha_entrega > self.fecha_devolucion:
-            self.estado = "atrasado"
-            if (self.fecha_entrega - self.fecha_devolucion).days > 10:
-                self.estado = "reportado"
+        if self.fecha_entrega and self.fecha_devolucion:
+            if self.fecha_entrega < self.fecha_devolucion:
+                self.estado = "atrasado"
         super().save(*args, **kwargs)
+
 
     
 

@@ -16,6 +16,9 @@ class UserListCreateView(generics.ListCreateAPIView):
     authentication_classes = [TokenAuthentication]  # Usar TokenAuthentication
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
+    def get_object(self):
+        # Devuelve el usuario actual basado en la autenticación
+        return self.request.user
     
 # BORRAR  USUARIOS [DELETE]
 class UserDeleteView(generics.DestroyAPIView):

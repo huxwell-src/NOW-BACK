@@ -7,59 +7,6 @@ from .models import User, Carrera, Producto, Solicitud, ProductoSolicitado
 UserModel = get_user_model()
 
 
-# REGISTRAR - VER USUARIOS
-class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
-
-    class Meta:
-        model = User
-        fields = '__all__'
-
-    def create(self, validated_data):
-        email = validated_data['email']
-        password = validated_data['password'] 
-        user = User.objects.create_user(email=email, password=password)  # Pasar la contraseña a la creación del usuario
-
-        user.rol = validated_data['rol']
-        user.rut = validated_data['rut']
-        user.nombre = validated_data['nombre']
-        user.apellido = validated_data['apellido']
-        user.carrera.set(validated_data['carrera'])
-        user.curso = validated_data['curso']
-        user.solicitudes.set(validated_data['solicitudes'])
-        user.save()
-        return user
-    
-    def update(self, instance, validated_data):
-        validated_data.pop('password', None)  # Eliminar el campo password de los datos validados
-
-        # Actualizar campos simples
-        instance.rol = validated_data.get('rol', instance.rol)
-        instance.rut = validated_data.get('rut', instance.rut)
-        instance.nombre = validated_data.get('nombre', instance.nombre)
-        instance.apellido = validated_data.get('apellido', instance.apellido)
-        instance.curso = validated_data.get('curso', instance.curso)
-
-        # Actualizar campos de relaciones
-        if 'carrera' in validated_data:
-            instance.carrera.set(validated_data['carrera'])
-
-        if 'solicitudes' in validated_data:
-            instance.solicitudes.set(validated_data['solicitudes'])
-
-        # Actualizar contraseña si se proporciona
-        password = validated_data.get('password')
-        if password:
-            instance.set_password(password)
-
-        instance.save()
-        return super().update(instance, validated_data)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        # Excluir el campo 'password' de la representación
-        data.pop('password', None)
-        return data
 
 # LOGUEAR USUARIOS
 
@@ -109,6 +56,9 @@ class SolicitudSerializer(serializers.ModelSerializer):
             'nombre': instance.usuario.nombre,
             'apellido': instance.usuario.apellido,
             'rut': instance.usuario.rut,
+            'curso': instance.usuario.curso,
+            'carreras': CarreraSerializer(instance.usuario.carrera.all(), many=True).data  # Convierte las carreras a representaciones serializables
+            
         }
         profesor_info = None
         if instance.profesor:
@@ -178,6 +128,72 @@ class SolicitudSerializer(serializers.ModelSerializer):
                 producto_solicitado.save()
 
         return instance
+
+# REGISTRAR - VER USUARIOS
+class UserRegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+    solicitudes = SolicitudSerializer(many=True)
+
+
+    class Meta:
+        model = User
+        fields = '__all__'
+        
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        solicitudes_data = data.get('solicitudes', [])
+        # Excluir el campo 'password' de la representación
+        data.pop('password', None)
+
+        # Filtrar las solicitudes basándote en el campo 'id_user'
+        filtered_solicitudes = Solicitud.objects.filter(usuario=instance.id_user)
+        solicitud_serializer = SolicitudSerializer(filtered_solicitudes, many=True)
+        data['solicitudes'] = solicitud_serializer.data
+
+        return data
+
+    def create(self, validated_data):
+        email = validated_data['email']
+        password = validated_data['password'] 
+        user = User.objects.create_user(email=email, password=password)  # Pasar la contraseña a la creación del usuario
+
+        user.rol = validated_data['rol']
+        user.rut = validated_data['rut']
+        user.nombre = validated_data['nombre']
+        user.apellido = validated_data['apellido']
+        user.carrera.set(validated_data['carrera'])
+        user.curso = validated_data['curso']
+        user.solicitudes.set(validated_data['solicitudes'])
+        user.save()
+        return user
+    
+    def update(self, instance, validated_data):
+        validated_data.pop('password', None)  # Eliminar el campo password de los datos validados
+
+        # Actualizar campos simples
+        instance.rol = validated_data.get('rol', instance.rol)
+        instance.rut = validated_data.get('rut', instance.rut)
+        instance.nombre = validated_data.get('nombre', instance.nombre)
+        instance.apellido = validated_data.get('apellido', instance.apellido)
+        instance.curso = validated_data.get('curso', instance.curso)
+
+        # Actualizar campos de relaciones
+        if 'carrera' in validated_data:
+            instance.carrera.set(validated_data['carrera'])
+
+        if 'solicitudes' in validated_data:
+            instance.solicitudes.set(validated_data['solicitudes'])
+
+        # Actualizar contraseña si se proporciona
+        password = validated_data.get('password')
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return super().update(instance, validated_data)
+
+    
 
     
 class UserSerializer(serializers.ModelSerializer):
