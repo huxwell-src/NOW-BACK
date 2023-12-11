@@ -32,7 +32,7 @@ class CarreraSerializer(serializers.ModelSerializer):
 class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
-        fields = ('id_producto', 'nombre', 'stock', 'medida_stock', 'descripcion', 'carrera')
+        fields = ('id_producto', 'nombre', 'stock', 'medida_stock', 'disponibilidad' , 'descripcion', 'carrera')
 
 class ProductoSolicitadoSerializer(serializers.ModelSerializer):
     class Meta:

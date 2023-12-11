@@ -57,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-    stock = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.IntegerField(default=0)
     medida_stock = models.CharField(max_length=20)
     descripcion = models.TextField()
     carrera = models.ManyToManyField(Carrera, blank=True)

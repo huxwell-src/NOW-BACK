@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.documentation import include_docs_urls
 from . import views
-from .views import UserListCreateView, UserUpdateView, UserDeleteView, ProductoListView, SolicitudListCreateView, SolicitudRetrieveUpdateView
+from .views import UserListCreateView, UserUpdateView, UserDeleteView, ProductoListView, SolicitudListCreateView, SolicitudRetrieveUpdateView, ProductoDetailView
 
 urlpatterns = [
     path('login', views.UserLogin.as_view(), name='login'), # POST
@@ -11,6 +11,7 @@ urlpatterns = [
     path('edit/<int:pk>', UserUpdateView.as_view(), name='user-update'),  #PUT
     path('delete/<int:pk>', UserDeleteView.as_view(), name='user-delete'), #DELETE
     path('productos', ProductoListView.as_view(), name='producto-list'), # GET #GET/ID
+    path('productos/<int:pk>', ProductoDetailView.as_view(), name='producto-detail'),
     path('solicitudes', SolicitudListCreateView.as_view(), name='solicitud-list-create'), # GET #GET/ID
     path('solicitudes/<int:pk>', SolicitudRetrieveUpdateView.as_view(), name='solicitud-retrieve-update'), # PUT
     
