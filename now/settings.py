@@ -66,8 +66,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
     "http://localhost:5175",
-    "https://now-front.vercel.app"
+    "https://now-front-mkaj7q4hl-huxwell-src.vercel.app",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = "now.urls"
 
