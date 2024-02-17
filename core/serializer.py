@@ -132,7 +132,7 @@ class SolicitudSerializer(serializers.ModelSerializer):
 # REGISTRAR - VER USUARIOS
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
-    solicitudes = SolicitudSerializer(many=True)
+    solicitudes = SolicitudSerializer(many=True, required=False)  # Hacer que el campo sea opcional
 
 
     class Meta:
@@ -154,19 +154,21 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        email = validated_data['email']
-        password = validated_data['password'] 
-        user = User.objects.create_user(email=email, password=password)  # Pasar la contraseña a la creación del usuario
+        productos_data = validated_data.pop('productos', [])
+        solicitud = Solicitud.objects.create(**validated_data)
+        
 
-        user.rol = validated_data['rol']
-        user.rut = validated_data['rut']
-        user.nombre = validated_data['nombre']
-        user.apellido = validated_data['apellido']
-        user.carrera.set(validated_data['carrera'])
-        user.curso = validated_data['curso']
-        user.solicitudes.set(validated_data['solicitudes'])
-        user.save()
-        return user
+        for producto_data in productos_data:
+            id_producto = producto_data['id_producto']  # Accede directamente al id del producto
+            cantidad = producto_data['cantidad']
+            try:
+                producto = Producto.objects.get(id_producto=id_producto)
+                carrera_nombre = producto.carrera.first().nombre  # Obtén el nombre de la primera carrera asociada al producto
+            except Producto.DoesNotExist:
+                carrera_nombre = ""  # Manejar la situación en la que el producto no existe o no tiene una carrera asociada
+            ProductoSolicitado.objects.create(id_solicitud=solicitud, id_producto=id_producto, cantidad=cantidad, carrera_nombre=carrera_nombre)
+
+        return solicitud
     
     def update(self, instance, validated_data):
         validated_data.pop('password', None)  # Eliminar el campo password de los datos validados
