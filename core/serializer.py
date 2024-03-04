@@ -132,7 +132,7 @@ class SolicitudSerializer(serializers.ModelSerializer):
 # REGISTRAR - VER USUARIOS
 class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
-    solicitudes = SolicitudSerializer(many=True, required=False)  # Hacer que el campo sea opcional
+    solicitudes = serializers.PrimaryKeyRelatedField(many=True, queryset=Solicitud.objects.all(), required=False)
 
 
     class Meta:
@@ -154,21 +154,24 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        productos_data = validated_data.pop('productos', [])
-        solicitud = Solicitud.objects.create(**validated_data)
-        
+        # Extraer los datos de las solicitudes, si existen
+        solicitudes_data = validated_data.pop('solicitudes', [])
+        carreras_data = validated_data.pop('carrera', [])
+        grupos_data = validated_data.pop('grupos', [])
 
-        for producto_data in productos_data:
-            id_producto = producto_data['id_producto']  # Accede directamente al id del producto
-            cantidad = producto_data['cantidad']
-            try:
-                producto = Producto.objects.get(id_producto=id_producto)
-                carrera_nombre = producto.carrera.first().nombre  # Obtén el nombre de la primera carrera asociada al producto
-            except Producto.DoesNotExist:
-                carrera_nombre = ""  # Manejar la situación en la que el producto no existe o no tiene una carrera asociada
-            ProductoSolicitado.objects.create(id_solicitud=solicitud, id_producto=id_producto, cantidad=cantidad, carrera_nombre=carrera_nombre)
+        # Crear el usuario con los datos validados
+        user = User.objects.create(**validated_data)
 
-        return solicitud
+        # Establecer las solicitudes del usuario como una lista vacía
+        user.solicitudes.set([])
+        user.groups.set([])  # Utilizar el método set() para establecer los grupos como una lista vacía
+        user.carrera.set(carreras_data)
+
+        # Crear las solicitudes, si hay datos de solicitudes proporcionados
+        for solicitud_data in solicitudes_data:
+            Solicitud.objects.create(user=user, **solicitud_data)
+
+        return user
     
     def update(self, instance, validated_data):
         validated_data.pop('password', None)  # Eliminar el campo password de los datos validados
